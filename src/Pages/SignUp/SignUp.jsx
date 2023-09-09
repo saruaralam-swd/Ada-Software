@@ -1,29 +1,41 @@
+import { useContext } from "react";
 import { Link } from "react-router-dom";
+import { AuthContext } from "../../Context/AuthProvider/AuthProvider";
+import { getImageURL } from "../../api/getImageURL";
 
 const SignUp = () => {
-  //
+  const { createUser, updateUserProfile } = useContext(AuthContext);
+
   const handleSubmit = (event) => {
     event.preventDefault();
-    // const name = event.target.name.value;
-    // const email = event.target.email.value;
-    // const password = event.target.password.value;
 
-    // image upload
+    const name = event.target.name.value;
     const image = event.target.image.files[0];
-    const formData = new FormData();
-    formData.append("image", image);
-    const url = `https://api.imgbb.com/1/upload?key=${
-      import.meta.env.VITE_imageBb_Key
-    }`;
-    fetch(url, {
-      method: "post",
-      body: formData,
-    })
-      .then((res) => res.json())
+    const email = event.target.email.value;
+    const password = event.target.password.value;
+
+    getImageURL(image)
       .then((imageData) => {
-        console.log(imageData);
+        createUser(email, password)
+          .then((result) => {
+            userUpdate(name, imageData?.data?.display_url);
+          })
+          .catch((error) => {
+            console.log(error.message);
+          });
+      })
+      .catch((error) => {
+        console.log(error.message);
       });
   };
+
+  function userUpdate(name, photoURL) {
+    updateUserProfile(name, photoURL)
+      .then(() => {
+        alert("User Create Successful");
+      })
+      .catch((error) => console.log(error.message));
+  }
 
   return (
     <div className="flex justify-center items-center pt-8">
